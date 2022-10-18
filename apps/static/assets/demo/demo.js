@@ -106,9 +106,7 @@ demo = {
     });
   },
 
-
-  initDBDChart: function(chart_labels,chart_kasusDBD,chart_suhu,chart_kelembapan,chart_ss) {
-
+  initTemplate: function () {
     gradientChartOptionsConfigurationWithTooltipBlue = {
       maintainAspectRatio: false,
       legend: {
@@ -483,16 +481,544 @@ demo = {
       myChartData.update();
     });
 
+  },
 
-    // var ctx = document.getElementById("CountryChart").getContext("2d");
+  initDBDChart: function(chart_labels,chart_kasusDBD,chart_suhu,chart_kelembapan,chart_ss) {
 
+    gradientChartOptionsConfigurationWithTooltipPurple = {
+      maintainAspectRatio: false,
+      legend: {
+        display: false
+      },
+  
+      tooltips: {
+        backgroundColor: '#f5f5f5',
+        titleFontColor: '#333',
+        bodyFontColor: '#666',
+        bodySpacing: 4,
+        xPadding: 12,
+        mode: "nearest",
+        intersect: 0,
+        position: "nearest"
+      },
+      responsive: true,
+      scales: {
+        yAxes: [{
+          barPercentage: 1.6,
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(29,140,248,0.0)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            suggestedMin: 5,
+            suggestedMax: 30,
+            padding: 20,
+            fontColor: "#9a9a9a"
+          }
+        }],
+  
+        xAxes: [{
+          barPercentage: 1.6,
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(225,78,202,0.1)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            padding: 20,
+            fontColor: "#9a9a9a"
+          }
+        }]
+      }
+    };
+
+
+    var ctx = document.getElementById("chartLinePurple").getContext("2d");
+
+    var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke.addColorStop(1, 'rgba(72,72,176,0.2)');
+    gradientStroke.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
+
+    var data = {
+      labels: chart_labels,
+      datasets: [{
+        label: "Jumlah Kasus DBD",
+        fill: true,
+        backgroundColor: gradientStroke,
+        borderColor: '#d048b6',
+        borderWidth: 2,
+        borderDash: [],
+        borderDashOffset: 0.0,
+        pointBackgroundColor: '#d048b6',
+        pointBorderColor: 'rgba(255,255,255,0)',
+        pointHoverBackgroundColor: '#d048b6',
+        pointBorderWidth: 20,
+        pointHoverRadius: 4,
+        pointHoverBorderWidth: 15,
+        pointRadius: 4,
+        data: chart_kasusDBD,
+      }]
+    };
+
+    var myChart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: gradientChartOptionsConfigurationWithTooltipPurple
+    });
+
+    var ctxBig = document.getElementById("chartBig1").getContext('2d');
+
+    var gradientStroke = ctxBig.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke.addColorStop(1, 'rgba(72,72,176,0.1)');
+    gradientStroke.addColorStop(0.4, 'rgba(72,72,176,0.0)');
+    gradientStroke.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
+    var config = {
+      type: 'line',
+      data: {
+        labels: chart_labels,
+        datasets: [{
+          label: "Data",
+          fill: true,
+          backgroundColor: gradientStroke,
+          borderColor: '#d346b1',
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          pointBackgroundColor: '#d346b1',
+          pointBorderColor: 'rgba(255,255,255,0)',
+          pointHoverBackgroundColor: '#d346b1',
+          pointBorderWidth: 20,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 15,
+          pointRadius: 4,
+          data: chart_kelembapan,
+        }]
+      },
+      options: gradientChartOptionsConfigurationWithTooltipPurple
+    };
+    var myChartData = new Chart(ctxBig, config);
+    $("#0").click(function() {
+      var data = myChartData.config.data;
+      data.datasets[0].data = chart_kelembapan;
+      data.labels = chart_labels;
+      myChartData.update();
+    });
+    $("#1").click(function() {
+      var data = myChartData.config.data;
+      data.datasets[0].data = chart_suhu;
+      data.labels = chart_labels;
+      myChartData.update();
+    });
+
+    $("#2").click(function() {
+      var data = myChartData.config.data;
+      data.datasets[0].data = chart_ss;
+      data.labels = chart_labels;
+      myChartData.update();
+    });
+
+
+  },
+
+  initARIMApage: function (chart_prediksi,chart_peramalan,tabel_korelasi,tabel_akurasi) {
+    //PREDIKSI
+    var obj_prediksi = JSON.parse(chart_prediksi)
+    var tahun = Object.keys(obj_prediksi.kasusdbd);
+    var kasus_asli_prediksi = [];
+    var kelembapan_asli_prediksi = [];
+    var prediksi_kasus = [];
+    var prediksi_kelembapan = [];
+    var label_tahun_prediksi = [];
+
+    //PERAMALAN
+    var obj_peramalan = JSON.parse(chart_peramalan)
+    var tahun_peramalan = Object.keys(obj_peramalan.forecast_kasusdbd)
+    var peramalan_kasus = [];
+    var peramalan_kelembapan = [];
+    var label_tahun_peramalan = [];
+
+    //KORELASI
+    var obj_korelasi = JSON.parse(tabel_korelasi)
+    var label_korelasi = Object.keys(obj_korelasi.KasusDBD)
+    var korelasi_kasusdbd = [];
+    var korelasi_rhavg = [];
+
+    //AKURASI
+    var obj_akurasi = JSON.parse(tabel_akurasi)
+    var label_akurasi = ["RMSE","MAPE"]
+    var rmse_kasusdbd = [];
+    var rmse_rhavg = [];
+    rmse_kasusdbd.push(obj_akurasi[0]['RMSE'])
+    rmse_kasusdbd.push(obj_akurasi[0]['MAPE'])
+    rmse_rhavg.push(obj_akurasi[1]['RMSE'])
+    rmse_rhavg.push(obj_akurasi[1]['MAPE'])
+    
+    for(var item of label_korelasi){
+      korelasi_kasusdbd.push(obj_korelasi.KasusDBD[item])
+      korelasi_rhavg.push(obj_korelasi.RHavg[item])
+    }
+    
+    for (var item_tahun of tahun){
+      kasus_asli_prediksi.push(obj_prediksi.kasusdbd[item_tahun])
+      kelembapan_asli_prediksi.push(obj_prediksi.rhavg[item_tahun])
+    }
+
+    for (var item_tahun of tahun){
+      prediksi_kasus.push(obj_prediksi.pred_kasusdbd[item_tahun])
+      prediksi_kelembapan.push(obj_prediksi.pred_rhavg[item_tahun])
+    }
+
+    for (var item_tahun of tahun_peramalan){
+      peramalan_kasus.push(obj_peramalan.forecast_kasusdbd[item_tahun])
+      peramalan_kelembapan.push(obj_peramalan.forecast_rhavg[item_tahun])
+    }
+
+    for (var item_tahun of tahun){
+      label_tahun_prediksi.push(item_tahun.replace('T00:00:00.000Z',''))
+    }
+
+    for (var item_tahun of tahun_peramalan){
+      label_tahun_peramalan.push(item_tahun.replace('T00:00:00.000Z',''))
+    }
+
+
+    // TABLE DATA PERAMALAN
+    const tbody = document.getElementById("table-data-peramalan")
+    for(let index = 0;index < label_tahun_peramalan.length;index++){
+      tbody.innerHTML += `
+      <tr>
+      <td class="text-center">${label_tahun_peramalan[index]}</td>
+      <td class="text-center">${peramalan_kasus[index]}</td>
+      </tr>
+      `
+    }
+    
+    // TABLE DATA KORELASI
+    const tbody2 = document.getElementById("table-data-korelasi")
+    for(let index = 0;index < label_korelasi.length;index++){
+      tbody2.innerHTML += `
+      <tr>
+      <td class="text-center">${label_korelasi[index]}</td>
+      <td class="text-center">${korelasi_kasusdbd[index]}</td>
+      <td class="text-center">${korelasi_rhavg[index]}</td>
+      </tr>
+      `
+    }
+
+    // TABLE DATA AKURASI
+    const tbody3 = document.getElementById("table-data-akurasi")
+    for(let index = 0;index < obj_akurasi.length;index++){
+     tbody3.innerHTML += `
+      <tr>
+      <td class="text-center">${label_akurasi[index]}</td>
+      <td class="text-center">${rmse_kasusdbd[index]}</td>
+      </tr>
+      `
+    }
+
+    
+    // CHART PREDIKSI KASUS DBD
+    gradientChartOptionsConfigurationWithTooltipPurple = {
+      maintainAspectRatio: false,
+      legend: {
+        display: false
+      },
+  
+      tooltips: {
+        backgroundColor: '#f5f5f5',
+        titleFontColor: '#333',
+        bodyFontColor: '#666',
+        bodySpacing: 4,
+        xPadding: 12,
+        mode: "nearest",
+        intersect: 0,
+        position: "nearest"
+      },
+      responsive: true,
+      scales: {
+        yAxes: [{
+          barPercentage: 1.6,
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(29,140,248,0.0)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            suggestedMin: 50,
+            suggestedMax: 1000,
+            padding: 20,
+            fontColor: "#9a9a9a"
+          }
+        }],
+  
+        xAxes: [{
+          barPercentage: 1.6,
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(225,78,202,0.1)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            padding: 20,
+            fontColor: "#9a9a9a"
+          }
+        }]
+      }
+    };  
+    var ctx = document.getElementById("PredictionDBDChart").getContext("2d");
+    var gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
+    var gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
+    gradientStroke1.addColorStop(1, 'rgba(72,72,176,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
+    gradientStroke2.addColorStop(1, 'rgba(66,134,121,0.15)');
+    gradientStroke2.addColorStop(0.4, 'rgba(66,134,121,0.0)'); //green colors
+    gradientStroke2.addColorStop(0, 'rgba(66,134,121,0)'); //green colors
+    var data = {
+      labels: label_tahun_prediksi,
+      datasets: [{
+        label: "Kasus DBD",
+        fill: true,
+        backgroundColor: gradientStroke1,
+        borderColor: '#d048b6',
+        borderWidth: 2,
+        borderDash: [],
+        borderDashOffset: 0.0,
+        pointBackgroundColor: '#d048b6',
+        pointBorderColor: 'rgba(255,255,255,0)',
+        pointHoverBackgroundColor: '#d048b6',
+        pointBorderWidth: 20,
+        pointHoverRadius: 4,
+        pointHoverBorderWidth: 15,
+        pointRadius: 4,
+        data: kasus_asli_prediksi,
+      },{
+        label: "Prediksi Kasus DBD",
+        fill: true,
+        backgroundColor: gradientStroke2,
+        borderColor: '#00d6b4',
+        borderWidth: 2,
+        borderDash: [],
+        borderDashOffset: 0.0,
+        pointBackgroundColor: '#00d6b4',
+        pointBorderColor: 'rgba(255,255,255,0)',
+        pointHoverBackgroundColor: '#00d6b4',
+        pointBorderWidth: 20,
+        pointHoverRadius: 4,
+        pointHoverBorderWidth: 15,
+        pointRadius: 4,
+        data: prediksi_kasus,
+      },]
+    };
+    var myChart = new Chart(ctx, {
+      type: 'line',
+      data: data,
+      options: gradientChartOptionsConfigurationWithTooltipPurple
+    });
+    
+
+    //CHART PREDIKSI KELEMBAPAN
+    // gradientChartOptionsConfigurationWithTooltipGreen = {
+    //   maintainAspectRatio: false,
+    //   legend: {
+    //     display: false
+    //   },
+  
+    //   tooltips: {
+    //     backgroundColor: '#f5f5f5',
+    //     titleFontColor: '#333',
+    //     bodyFontColor: '#666',
+    //     bodySpacing: 4,
+    //     xPadding: 12,
+    //     mode: "nearest",
+    //     intersect: 0,
+    //     position: "nearest"
+    //   },
+    //   responsive: true,
+    //   scales: {
+    //     yAxes: [{
+    //       barPercentage: 1.6,
+    //       gridLines: {
+    //         drawBorder: false,
+    //         color: 'rgba(29,140,248,0.0)',
+    //         zeroLineColor: "transparent",
+    //       },
+    //       ticks: {
+    //         suggestedMin: 50,
+    //         suggestedMax: 100,
+    //         padding: 20,
+    //         fontColor: "#9e9e9e"
+    //       }
+    //     }],
+  
+    //     xAxes: [{
+    //       barPercentage: 1.6,
+    //       gridLines: {
+    //         drawBorder: false,
+    //         color: 'rgba(0,242,195,0.1)',
+    //         zeroLineColor: "transparent",
+    //       },
+    //       ticks: {
+    //         padding: 20,
+    //         fontColor: "#9e9e9e"
+    //       }
+    //     }]
+    //   }
+    // };
+    // var ctxGreen = document.getElementById("PredictionRHAVGChart").getContext("2d");
+    // var gradientStroke1 = ctxGreen.createLinearGradient(0, 230, 0, 50);
+    // var gradientStroke2 = ctxGreen.createLinearGradient(0, 230, 0, 50);
+    // gradientStroke1.addColorStop(1, 'rgba(72,72,176,0.2)');
+    // gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    // gradientStroke1.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
+    // gradientStroke2.addColorStop(1, 'rgba(66,134,121,0.15)');
+    // gradientStroke2.addColorStop(0.4, 'rgba(66,134,121,0.0)'); //green colors
+    // gradientStroke2.addColorStop(0, 'rgba(66,134,121,0)'); //green colors
+    // var data = {
+    //   labels: label_tahun_prediksi,
+    //   datasets: [{
+    //     label: "Kelembapan",
+    //     fill: true,
+    //     backgroundColor: gradientStroke1,
+    //     borderColor: '#d048b6',
+    //     borderWidth: 2,
+    //     borderDash: [],
+    //     borderDashOffset: 0.0,
+    //     pointBackgroundColor: '#d048b6',
+    //     pointBorderColor: 'rgba(255,255,255,0)',
+    //     pointHoverBackgroundColor: '#d048b6',
+    //     pointBorderWidth: 20,
+    //     pointHoverRadius: 4,
+    //     pointHoverBorderWidth: 15,
+    //     pointRadius: 4,
+    //     data: kelembapan_asli_prediksi,
+    //   },{
+    //     label: "Prediksi kelembapan",
+    //     fill: true,
+    //     backgroundColor: gradientStroke2,
+    //     borderColor: '#00d6b4',
+    //     borderWidth: 2,
+    //     borderDash: [],
+    //     borderDashOffset: 0.0,
+    //     pointBackgroundColor: '#00d6b4',
+    //     pointBorderColor: 'rgba(255,255,255,0)',
+    //     pointHoverBackgroundColor: '#00d6b4',
+    //     pointBorderWidth: 20,
+    //     pointHoverRadius: 4,
+    //     pointHoverBorderWidth: 15,
+    //     pointRadius: 4,
+    //     data: prediksi_kelembapan,
+    //   },{
+    //     label: "Peramalan kelembapan",
+    //     fill: true,
+    //     backgroundColor: gradientStroke,
+    //     borderColor: '#00d6b4',
+    //     borderWidth: 2,
+    //     borderDash: [],
+    //     borderDashOffset: 0.0,
+    //     pointBackgroundColor: '#00d6b4',
+    //     pointBorderColor: 'rgba(255,255,255,0)',
+    //     pointHoverBackgroundColor: '#00d6b4',
+    //     pointBorderWidth: 20,
+    //     pointHoverRadius: 4,
+    //     pointHoverBorderWidth: 15,
+    //     pointRadius: 4,
+    //     data: peramalan_kelembapan,
+    //   }]
+    // };
+    // var myChart = new Chart(ctxGreen, {
+    //   type: 'line',
+    //   data: data,
+    //   options: gradientChartOptionsConfigurationWithTooltipGreen
+    // });
+
+
+    //CHART PERAMALAN
+    gradientBarChartConfiguration = {
+      maintainAspectRatio: false,
+      legend: {
+        display: false
+      },
+  
+      tooltips: {
+        backgroundColor: '#f5f5f5',
+        titleFontColor: '#333',
+        bodyFontColor: '#666',
+        bodySpacing: 4,
+        xPadding: 12,
+        mode: "nearest",
+        intersect: 0,
+        position: "nearest"
+      },
+      responsive: true,
+      scales: {
+        yAxes: [{
+  
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(29,140,248,0.1)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            suggestedMin: 60,
+            suggestedMax: 100,
+            padding: 20,
+            fontColor: "#9e9e9e"
+          }
+        }],
+  
+        xAxes: [{
+  
+          gridLines: {
+            drawBorder: false,
+            color: 'rgba(29,140,248,0.1)',
+            zeroLineColor: "transparent",
+          },
+          ticks: {
+            padding: 20,
+            fontColor: "#9e9e9e"
+          }
+        }]
+      }
+    };
+    // CHART PERAMALAN KASUS DBD
+    var ctx = document.getElementById("ForecastDBDChart").getContext("2d");
+    var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
+    gradientStroke.addColorStop(1, 'rgba(29,140,248,0.2)');
+    gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
+    gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); 
+    var myChart = new Chart(ctx, {
+      type: 'bar',
+      responsive: true,
+      legend: {
+        display: false
+      },
+      data: {
+        labels: label_tahun_peramalan,
+        datasets: [{
+          label: "Peramalan Kasus DBD",
+          fill: true,
+          backgroundColor: gradientStroke,
+          hoverBackgroundColor: gradientStroke,
+          borderColor: '#1f8ef1',
+          borderWidth: 2,
+          borderDash: [],
+          borderDashOffset: 0.0,
+          data: peramalan_kasus,
+        }]
+      },
+      options: gradientBarChartConfiguration
+    });
+    //CHART PERAMALAN KELEMBAPAN
+    // var ctx = document.getElementById("ForecastRHAVGChart").getContext("2d");
     // var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
     // gradientStroke.addColorStop(1, 'rgba(29,140,248,0.2)');
     // gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
-    // gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); //blue colors
-
-
+    // gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); 
     // var myChart = new Chart(ctx, {
     //   type: 'bar',
     //   responsive: true,
@@ -500,9 +1026,9 @@ demo = {
     //     display: false
     //   },
     //   data: {
-    //     labels: ['USA', 'GER', 'AUS', 'UK', 'RO', 'BR'],
+    //     labels: label_tahun_peramalan,
     //     datasets: [{
-    //       label: "Countries",
+    //       label: "Peramalan Kelembapan",
     //       fill: true,
     //       backgroundColor: gradientStroke,
     //       hoverBackgroundColor: gradientStroke,
@@ -510,7 +1036,7 @@ demo = {
     //       borderWidth: 2,
     //       borderDash: [],
     //       borderDashOffset: 0.0,
-    //       data: [53, 20, 10, 80, 100, 45],
+    //       data: peramalan_kelembapan,
     //     }]
     //   },
     //   options: gradientBarChartConfiguration
@@ -518,413 +1044,6 @@ demo = {
 
   },
 
-  // initClimateChart: function(chart_labels,chart_suhu,chart_kelembapan,chart_ss) {
-
-  //   gradientChartOptionsConfigurationWithTooltipBlue = {
-  //     maintainAspectRatio: false,
-  //     legend: {
-  //       display: false
-  //     },
-  
-  //     tooltips: {
-  //       backgroundColor: '#f5f5f5',
-  //       titleFontColor: '#333',
-  //       bodyFontColor: '#666',
-  //       bodySpacing: 4,
-  //       xPadding: 12,
-  //       mode: "nearest",
-  //       intersect: 0,
-  //       position: "nearest"
-  //     },
-  //     responsive: true,
-  //     scales: {
-  //       yAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.0)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           suggestedMin: 60,
-  //           suggestedMax: 125,
-  //           padding: 20,
-  //           fontColor: "#2380f7"
-  //         }
-  //       }],
-  
-  //       xAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           padding: 20,
-  //           fontColor: "#2380f7"
-  //         }
-  //       }]
-  //     }
-  //   };
-  
-  //   gradientChartOptionsConfigurationWithTooltipPurple = {
-  //     maintainAspectRatio: false,
-  //     legend: {
-  //       display: false
-  //     },
-  
-  //     tooltips: {
-  //       backgroundColor: '#f5f5f5',
-  //       titleFontColor: '#333',
-  //       bodyFontColor: '#666',
-  //       bodySpacing: 4,
-  //       xPadding: 12,
-  //       mode: "nearest",
-  //       intersect: 0,
-  //       position: "nearest"
-  //     },
-  //     responsive: true,
-  //     scales: {
-  //       yAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.0)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           suggestedMin: 60,
-  //           suggestedMax: 125,
-  //           padding: 20,
-  //           fontColor: "#9a9a9a"
-  //         }
-  //       }],
-  
-  //       xAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(225,78,202,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           padding: 20,
-  //           fontColor: "#9a9a9a"
-  //         }
-  //       }]
-  //     }
-  //   };
-  
-  //   gradientChartOptionsConfigurationWithTooltipOrange = {
-  //     maintainAspectRatio: false,
-  //     legend: {
-  //       display: false
-  //     },
-  
-  //     tooltips: {
-  //       backgroundColor: '#f5f5f5',
-  //       titleFontColor: '#333',
-  //       bodyFontColor: '#666',
-  //       bodySpacing: 4,
-  //       xPadding: 12,
-  //       mode: "nearest",
-  //       intersect: 0,
-  //       position: "nearest"
-  //     },
-  //     responsive: true,
-  //     scales: {
-  //       yAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.0)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           suggestedMin: 50,
-  //           suggestedMax: 110,
-  //           padding: 20,
-  //           fontColor: "#ff8a76"
-  //         }
-  //       }],
-  
-  //       xAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(220,53,69,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           padding: 20,
-  //           fontColor: "#ff8a76"
-  //         }
-  //       }]
-  //     }
-  //   };
-  
-  //   gradientChartOptionsConfigurationWithTooltipGreen = {
-  //     maintainAspectRatio: false,
-  //     legend: {
-  //       display: false
-  //     },
-  
-  //     tooltips: {
-  //       backgroundColor: '#f5f5f5',
-  //       titleFontColor: '#333',
-  //       bodyFontColor: '#666',
-  //       bodySpacing: 4,
-  //       xPadding: 12,
-  //       mode: "nearest",
-  //       intersect: 0,
-  //       position: "nearest"
-  //     },
-  //     responsive: true,
-  //     scales: {
-  //       yAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.0)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           suggestedMin: 50,
-  //           suggestedMax: 125,
-  //           padding: 20,
-  //           fontColor: "#9e9e9e"
-  //         }
-  //       }],
-  
-  //       xAxes: [{
-  //         barPercentage: 1.6,
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(0,242,195,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           padding: 20,
-  //           fontColor: "#9e9e9e"
-  //         }
-  //       }]
-  //     }
-  //   };
-  
-  
-  //   gradientBarChartConfiguration = {
-  //     maintainAspectRatio: false,
-  //     legend: {
-  //       display: false
-  //     },
-  
-  //     tooltips: {
-  //       backgroundColor: '#f5f5f5',
-  //       titleFontColor: '#333',
-  //       bodyFontColor: '#666',
-  //       bodySpacing: 4,
-  //       xPadding: 12,
-  //       mode: "nearest",
-  //       intersect: 0,
-  //       position: "nearest"
-  //     },
-  //     responsive: true,
-  //     scales: {
-  //       yAxes: [{
-  
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           suggestedMin: 60,
-  //           suggestedMax: 120,
-  //           padding: 20,
-  //           fontColor: "#9e9e9e"
-  //         }
-  //       }],
-  
-  //       xAxes: [{
-  
-  //         gridLines: {
-  //           drawBorder: false,
-  //           color: 'rgba(29,140,248,0.1)',
-  //           zeroLineColor: "transparent",
-  //         },
-  //         ticks: {
-  //           padding: 20,
-  //           fontColor: "#9e9e9e"
-  //         }
-  //       }]
-  //     }
-  //   };
-
-  //   var ctx = document.getElementById("chartLinePurple").getContext("2d");
-
-  //   var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
-  //   gradientStroke.addColorStop(1, 'rgba(72,72,176,0.2)');
-  //   gradientStroke.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-  //   gradientStroke.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
-
-  //   var data = {
-  //     labels: ['JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
-  //     datasets: [{
-  //       label: "Data",
-  //       fill: true,
-  //       backgroundColor: gradientStroke,
-  //       borderColor: '#d048b6',
-  //       borderWidth: 2,
-  //       borderDash: [],
-  //       borderDashOffset: 0.0,
-  //       pointBackgroundColor: '#d048b6',
-  //       pointBorderColor: 'rgba(255,255,255,0)',
-  //       pointHoverBackgroundColor: '#d048b6',
-  //       pointBorderWidth: 20,
-  //       pointHoverRadius: 4,
-  //       pointHoverBorderWidth: 15,
-  //       pointRadius: 4,
-  //       data: [80, 100, 70, 80, 120, 80],
-  //     }]
-  //   };
-
-  //   var myChart = new Chart(ctx, {
-  //     type: 'line',
-  //     data: data,
-  //     options: gradientChartOptionsConfigurationWithTooltipPurple
-  //   });
-
-
-  //   var ctxGreen = document.getElementById("chartLineGreen").getContext("2d");
-
-  //   var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
-  //   gradientStroke.addColorStop(1, 'rgba(66,134,121,0.15)');
-  //   gradientStroke.addColorStop(0.4, 'rgba(66,134,121,0.0)'); //green colors
-  //   gradientStroke.addColorStop(0, 'rgba(66,134,121,0)'); //green colors
-
-  //   var data = {
-  //     labels: ['JUL', 'AUG', 'SEP', 'OCT', 'NOV'],
-  //     datasets: [{
-  //       label: "My First dataset",
-  //       fill: true,
-  //       backgroundColor: gradientStroke,
-  //       borderColor: '#00d6b4',
-  //       borderWidth: 2,
-  //       borderDash: [],
-  //       borderDashOffset: 0.0,
-  //       pointBackgroundColor: '#00d6b4',
-  //       pointBorderColor: 'rgba(255,255,255,0)',
-  //       pointHoverBackgroundColor: '#00d6b4',
-  //       pointBorderWidth: 20,
-  //       pointHoverRadius: 4,
-  //       pointHoverBorderWidth: 15,
-  //       pointRadius: 4,
-  //       data: [90, 27, 60, 12, 80],
-  //     }]
-  //   };
-
-  //   var myChart = new Chart(ctxGreen, {
-  //     type: 'line',
-  //     data: data,
-  //     options: gradientChartOptionsConfigurationWithTooltipGreen
-
-  //   });
-
-
-  //   //var chart_labels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  //   //var chart_data = [100, 70, 90, 70, 85, 60, 75, 60, 90, 80, 110, 100];
-
-
-  //   var ctx = document.getElementById("chartBig2").getContext('2d');
-
-  //   var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
-  //   gradientStroke.addColorStop(1, 'rgba(72,72,176,0.1)');
-  //   gradientStroke.addColorStop(0.4, 'rgba(72,72,176,0.0)');
-  //   gradientStroke.addColorStop(0, 'rgba(119,52,169,0)'); //purple colors
-  //   var config = {
-  //     type: 'line',
-  //     data: {
-  //       labels: chart_labels,
-  //       datasets: [{
-  //         label: "My First dataset",
-  //         fill: true,
-  //         backgroundColor: gradientStroke,
-  //         borderColor: '#d346b1',
-  //         borderWidth: 2,
-  //         borderDash: [],
-  //         borderDashOffset: 0.0,
-  //         pointBackgroundColor: '#d346b1',
-  //         pointBorderColor: 'rgba(255,255,255,0)',
-  //         pointHoverBackgroundColor: '#d346b1',
-  //         pointBorderWidth: 20,
-  //         pointHoverRadius: 4,
-  //         pointHoverBorderWidth: 15,
-  //         pointRadius: 4,
-  //         data: chart_kelembapan,
-  //       }]
-  //     },
-  //     options: gradientChartOptionsConfigurationWithTooltipPurple
-  //   };
-  //   var myChartData = new Chart(ctx, config);
-  //   $("#0").click(function() {
-  //     var data = myChartData.config.data;
-  //     data.datasets[0].data = chart_kelembapan;
-  //     data.labels = chart_labels;
-  //     myChartData.update();
-  //   });
-  //   $("#1").click(function() {
-  //     // var chart_data = [80, 120, 105, 110, 95, 105, 90, 100, 80, 95, 70, 120];
-  //     var data = myChartData.config.data;
-  //     data.datasets[0].data = chart_suhu;
-  //     data.labels = chart_labels;
-  //     myChartData.update();
-  //   });
-  //   $("#2").click(function() {
-  //     // var chart_data = [60, 80, 65, 130, 80, 105, 90, 130, 70, 115, 60, 130];
-  //     var data = myChartData.config.data;
-  //     data.datasets[0].data = chart_ss;
-  //     data.labels = chart_labels;
-  //     myChartData.update();
-  //   });
-
-
-  //   var ctx = document.getElementById("CountryChart").getContext("2d");
-
-  //   var gradientStroke = ctx.createLinearGradient(0, 230, 0, 50);
-
-  //   gradientStroke.addColorStop(1, 'rgba(29,140,248,0.2)');
-  //   gradientStroke.addColorStop(0.4, 'rgba(29,140,248,0.0)');
-  //   gradientStroke.addColorStop(0, 'rgba(29,140,248,0)'); //blue colors
-
-
-  //   var myChart = new Chart(ctx, {
-  //     type: 'bar',
-  //     responsive: true,
-  //     legend: {
-  //       display: false
-  //     },
-  //     data: {
-  //       labels: ['USA', 'GER', 'AUS', 'UK', 'RO', 'BR'],
-  //       datasets: [{
-  //         label: "Countries",
-  //         fill: true,
-  //         backgroundColor: gradientStroke,
-  //         hoverBackgroundColor: gradientStroke,
-  //         borderColor: '#1f8ef1',
-  //         borderWidth: 2,
-  //         borderDash: [],
-  //         borderDashOffset: 0.0,
-  //         data: [53, 20, 10, 80, 100, 45],
-  //       }]
-  //     },
-  //     options: gradientBarChartConfiguration
-  //   });
-
-  // },
 
   initGoogleMaps: function() {
     var myLatlng = new google.maps.LatLng(40.748817, -73.985428);

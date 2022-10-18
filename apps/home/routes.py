@@ -3,16 +3,19 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+import traceback
 from apps.home import blueprint
 from flask import render_template, request
 from flask_login import login_required
 from jinja2 import TemplateNotFound
+import json
+
+from ..proses_ml import KasusDBDxKelembapan
 
 import csv
 
 
 @blueprint.route('/index')
-@login_required
 def index():
     with open('dataTA.csv', mode='r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -22,7 +25,7 @@ def index():
         rhavg = []
         ss = []
         line_count = 0
-        
+
         for row in csv_reader:
             if line_count == 0:
                 line_count += 1
@@ -39,7 +42,7 @@ def index():
         'chart_labels': tahun,
         'chart_kasusDBD': kasusDBD,
         'chart_suhu': tavg,
-        'chart_kelembapan' : rhavg,
+        'chart_kelembapan': rhavg,
         'chart_ss': ss
     }
 
@@ -47,16 +50,29 @@ def index():
 
 
 @blueprint.route('/<template>')
-@login_required
 def route_template(template):
 
     try:
-
         if not template.endswith('.html'):
             template += '.html'
 
         # Detect the current page
         segment = get_segment(request)
+
+        if template == 'arima.html':
+            hasil_data_prediksi = KasusDBDxKelembapan.uji_data_prediction()
+            hasil_data_peramalan = KasusDBDxKelembapan.uji_data_forecast()
+            hasil_uji_akurasi = KasusDBDxKelembapan.uji_akurasi()
+            hasil_uji_korelasi = KasusDBDxKelembapan.uji_korelasi()
+
+            print(hasil_data_peramalan.to_json())
+            print(hasil_data_prediksi.to_json())
+            print(hasil_uji_akurasi)
+            print(hasil_uji_korelasi)
+
+            return render_template(
+                "home/" + template, segment=segment, hasil_prediksi=hasil_data_prediksi.to_json(date_format='iso'), hasil_peramalan=hasil_data_peramalan.to_json(date_format='iso'), hasil_uji_akurasi=json.dumps(hasil_uji_akurasi),
+                hasil_uji_korelasi=hasil_uji_korelasi.to_json())
 
         # Serve the file (if exists) from app/templates/home/FILE.html
         return render_template("home/" + template, segment=segment)
@@ -64,7 +80,8 @@ def route_template(template):
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
 
-    except:
+    except Exception:
+        traceback.print_exc()
         return render_template('home/page-500.html'), 500
 
 

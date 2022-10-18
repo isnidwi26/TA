@@ -8,22 +8,184 @@
 {% block content %}
 
 
+
     <div class="row">
+      <div class="col-12 text-sm-center">
+        <div class="card">
+          <h2><br> HASIL PERAMALAN</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- chart peramalan -->
+    <div class="row">
+      <div class="col-12">
         <div class="card card-chart">
           <div class="card-header">
-            <h2 class="card-title">PREDIKSI KASUS DBD MENGGUNAKAN METODE ARIMA</h2>
+            <h2 class="card-title text-center">KASUS DBD</h2>
           </div>
           <div class="card-body">
             <div class="chart-area">
-              <canvas id="chartLinePurple"></canvas>
+              <canvas id="ForecastDBDChart"></canvas>
             </div>
           </div>
         </div>
       </div>
+      <!-- <div class="col-lg-6 col-12">
+        <div class="card card-chart">
+          <div class="card-header">
+            <h2 class="card-title">PERAMALAN KELEMBAPAN</h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-area">
+              <canvas id="ForecastRHAVGChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div> -->
+    </div>
 
+    <!-- tabel peramalan -->
+    <div class = "row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"> TABEL DATA PERAMALAN</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th class="text-center">
+                      Tahun
+                    </th>
+                    <th class="text-center">
+                      Peramalan Kasus DBD
+                    </th>
+                    <!-- <th class="text-center">
+                      Peramalan RHAVG
+                    </th> -->
+                  </tr>
+                </thead>
+                <tbody id="table-data-peramalan">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-12 text-sm-center">
+        <div class="card">
+          <h2><br> HASIL UJI PREDIKSI DATA TRAINING DAN TESTING</h2>
+        </div>
+      </div>
     </div>
  
+    <!-- chart prediksi -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-chart">
+          <div class="card-header">
+            <h2 class="card-title text-center"> KASUS DBD </h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-area">
+              <canvas id="PredictionDBDChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="col-12">
+        <div class="card card-chart">
+          <div class="card-header">
+            <h2 class="card-title">HASIL UJI PREDIKSI KELEMBAPAN </h2>
+          </div>
+          <div class="card-body">
+            <div class="chart-area">
+              <canvas id="PredictionRHAVGChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div> -->
+    </div>
+
+    <!-- tabel akurasi dan korelasi -->
+    <div class = "row">
+      <div class="col-lg-6 col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <h3 class="card-title"> TABEL DATA AKURASI</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th>
+                    </th>
+                    <th class="text-center">
+                      Kasus DBD
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="table-data-akurasi">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <h4 class="card-title"> TABEL PERHITUNGAN KORELASI</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th class="text-center">
+                      
+                    </th>
+                    <th class="text-center">
+                      Kasus DBD
+                    </th>
+                    <th class="text-center">
+                      RHavg
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="table-data-korelasi">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keterangan -->
+    <div class="row">
+      <div class="col-lg-6 col-md-12">
+        <div class="card">
+          <div class="card-body">
+              <ul class="list-unstyled">
+                <li>Keterangan <br></li>
+                <li>Kasus DBD : Kasus Demam Berdarah Dengue</li>
+                <li>RHavg     : Rain Humadity Average (Kelembapan Hujan Rata-Rata)</li>
+                <li>RMSE      : Root Mean Square Error</li>
+                <li>MAPE      : Mean Absolute Percentage Error</li>
+              </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
 {% endblock content %}
 
@@ -33,7 +195,12 @@
   <script>
     $(document).ready(function() {
       // Javascript method's body can be found in assets/js/demos.js
-      chart.initDashboardPageCharts();
+      hasil_prediksi={{hasil_prediksi|tojson}};
+      hasil_peramalan={{hasil_peramalan|tojson}};
+      hasil_uji_akurasi={{hasil_uji_akurasi|tojson}};
+      hasil_uji_korelasi={{hasil_uji_korelasi|tojson}};
+      // console.log(hasil_peramalan);
+      demo.initARIMApage(hasil_prediksi,hasil_peramalan,hasil_uji_korelasi,hasil_uji_akurasi);
     });
   </script>
 
